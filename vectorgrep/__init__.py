@@ -12,4 +12,4 @@ from vectorgrep.utils import grep
 from vectorgrep.utils import prepare_patterns
 from vectorgrep.utils import scan
 
-__version__ = "0.0.1"
+__version__ = "1.0.0"
