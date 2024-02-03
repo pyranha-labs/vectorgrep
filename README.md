@@ -61,7 +61,8 @@ about this change.
 
 - Supports Python 3.10+
 - Supports Linux systems with x86_64 architecture
-  - Tested on Ubuntu Bionic (18.04) and above
+  - Ubuntu Focal (20.04) and above out of the box
+  - Ubuntu Trusty (14.04) and above with gcc-9/g++-9 installed
   - Other Linux distros may work, but are not guaranteed
   - May be able to be built on Windows/OSX manually
   - More platforms are planned to be supported (natively) in the future
