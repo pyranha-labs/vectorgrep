@@ -9,12 +9,50 @@ BOOST_BUILD_VERSION=1.75.0
 VECTORSCAN_BUILD_VERSION=5.4.11
 ZSTD_BUILD_VERSION=1.5.5
 
+# Allow customizing the platform/build options for creating isolated local builds, or testing non-prod versions.
+# Options are based on cmake versions, e.g., linux-x86_64, linux-aarch64, etc.
+PLATFORM=linux-x86_64
+# Bionic contains cmake that is too old for Vectorscan 5.4.11+ (3.20+ required).
+CMAKE=3.28.1
+
 # Force execution in docker to ensure reproducibility.
 if [ ! -f /.dockerenv ]; then
   echo "Please run inside docker to isolate dependencies, prevent modifications to system, and ensure reproducibility. Aborting."
   echo "Example: docker run --rm -it -v ~/Development/vectorgrep:/mnt/vectorgrep ubuntu:bionic bash -c '/mnt/vectorgrep/utils/build_vectorgrep.sh'"
   exit 1
 fi
+
+# Pull out user args to modify default behavior.
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --boost)
+      if [ -z "$2" ]; then echo "Must provide boost version. Example: --boost ${BOOST_BUILD_VERSION}"; exit 1; fi
+      BOOST_BUILD_VERSION=$2
+      shift
+    ;;
+    --cmake)
+      if [ -z "$2" ]; then echo "Must provide cmake version. Example: --cmake ${CMAKE}"; exit 1; fi
+      CMAKE=$2
+      shift
+    ;;
+    --platform)
+      if [ -z "$2" ]; then echo "Must provide platform version. Example: --platform ${PLATFORM}"; exit 1; fi
+      PLATFORM=$2
+      shift
+    ;;
+    --vectorscan)
+      if [ -z "$2" ]; then echo "Must provide vectorscan version. Example: --vectorscan ${VECTORSCAN_BUILD_VERSION}"; exit 1; fi
+      VECTORSCAN_BUILD_VERSION=$2
+      shift
+    ;;
+    --zstd)
+      if [ -z "$2" ]; then echo "Must provide zstd version. Example: --zstd ${ZSTD_BUILD_VERSION}"; exit 1; fi
+      ZSTD_BUILD_VERSION=$2
+      shift
+    ;;
+  esac
+  shift
+done
 
 # Ensure the whole script exits on failures.
 set -e
@@ -48,10 +86,10 @@ update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 50 --slave /usr/bi
 update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-9 50
 
 # Bionic contains cmake that is too old for Vectorscan 5.4.11+ (3.20+ required).
-wget https://github.com/Kitware/CMake/releases/download/v3.28.1/cmake-3.28.1-linux-x86_64.tar.gz
-tar -xf cmake-3.28.1-linux-x86_64.tar.gz
-mv cmake-3.28.1-linux-x86_64/bin/* /usr/bin/
-mv cmake-3.28.1-linux-x86_64/share/cmake-3.28 /usr/share/
+wget https://github.com/Kitware/CMake/releases/download/v${CMAKE}/cmake-${CMAKE}-${PLATFORM}.tar.gz
+tar -xf cmake-${CMAKE}-${PLATFORM}.tar.gz
+mv cmake-${CMAKE}-${PLATFORM}/bin/* /usr/bin/
+mv cmake-${CMAKE}-${PLATFORM}/share/cmake-$(echo $CMAKE |grep -o "[0-9].[0-9]\+") /usr/share/
 
 # Create a new temporary location to allow for isolated compiling.
 build_dir=$(mktemp -d -t hsbuild-XXXXXXXX)
