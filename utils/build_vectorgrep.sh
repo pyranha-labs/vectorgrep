@@ -12,13 +12,13 @@ ZSTD_BUILD_VERSION=1.5.5
 # Allow customizing the platform/build options for creating isolated local builds, or testing non-prod versions.
 # Options are based on cmake versions, e.g., linux-x86_64, linux-aarch64, etc.
 PLATFORM=linux-x86_64
-# Bionic contains cmake that is too old for Vectorscan 5.4.11+ (3.20+ required).
+# Trusty contains cmake that is too old for Vectorscan 5.4.11+ (3.20+ required).
 CMAKE=3.28.1
 
 # Force execution in docker to ensure reproducibility.
 if [ ! -f /.dockerenv ]; then
   echo "Please run inside docker to isolate dependencies, prevent modifications to system, and ensure reproducibility. Aborting."
-  echo "Example: docker run --rm -it -v ~/Development/vectorgrep:/mnt/vectorgrep ubuntu:bionic bash -c '/mnt/vectorgrep/utils/build_vectorgrep.sh'"
+  echo "Example: docker run --rm -it -v ~/Development/vectorgrep:/mnt/vectorgrep ubuntu:trusty bash -c '/mnt/vectorgrep/utils/build_vectorgrep.sh'"
   exit 1
 fi
 
@@ -85,7 +85,7 @@ apt-get update && apt-get install -y \
 update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 50 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-9 50
 
-# Bionic contains cmake that is too old for Vectorscan 5.4.11+ (3.20+ required).
+# Trusty contains cmake that is too old for Vectorscan 5.4.11+ (3.20+ required).
 wget https://github.com/Kitware/CMake/releases/download/v${CMAKE}/cmake-${CMAKE}-${PLATFORM}.tar.gz
 tar -xf cmake-${CMAKE}-${PLATFORM}.tar.gz
 mv cmake-${CMAKE}-${PLATFORM}/bin/* /usr/bin/
