@@ -1,0 +1,18 @@
+# Secondary grep file to test multi file output formatting. Keep in sync with greptest1.txt.
+foo
+foobar
+[foo]
+<foo>
+<foo\bar>
+<foo\>
+<foo\\>
+\<foo\>
+food
+barfoo
+barfoo+
+bar<foo>
+foo bar
+<foo> bar
+extra foo bar
+extra <foo> bar
+# Secondary grep file to test multi file output formatting. Keep in sync with greptest1.txt.

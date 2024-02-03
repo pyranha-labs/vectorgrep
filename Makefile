@@ -1,8 +1,8 @@
 PROJECT_ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 SETUP_CFG := $(PROJECT_ROOT)setup.cfg
 PYTHON_BIN := python3.10
-NAME := hypergrep
-UPSTREAM := git@github.com:pyranha-labs/hypergrep.git
+NAME := vectorgrep
+UPSTREAM := git@github.com:pyranha-labs/vectorgrep.git
 
 
 ##### Initial Development Setups and Configurations #####

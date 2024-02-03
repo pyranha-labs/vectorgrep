@@ -1,0 +1,18 @@
+# Primary grep file to test patterns. Keep in sync with greptest2.txt.
+foo
+foobar
+[foo]
+<foo>
+<foo\bar>
+<foo\>
+<foo\\>
+\<foo\>
+food
+barfoo
+barfoo+
+bar<foo>
+foo bar
+<foo> bar
+extra foo bar
+extra <foo> bar
+# Primary grep file to test patterns. Keep in sync with greptest2.txt.
