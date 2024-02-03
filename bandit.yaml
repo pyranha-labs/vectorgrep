@@ -1,0 +1,10 @@
+exclude_dirs:
+    - .venv
+    - .virtualenv
+    - venv
+    - virtualenv
+    - test
+    - tests
+
+targets:
+  - hypergrep
