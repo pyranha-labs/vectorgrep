@@ -13,6 +13,7 @@ HS_FLAG_MULTILINE = 4
 HS_FLAG_SINGLEMATCH = 8
 
 __libvectorgrep__ = None
+__libvectorgrep_path__ = ""
 __libvectorscan__ = None
 __libvectorscan_path__ = ""
 __libzstd__ = None
@@ -73,8 +74,7 @@ def _get_vectorgrep_lib() -> ctypes.cdll:
     global __libvectorgrep__  # pylint: disable=global-statement
     if __libvectorgrep__ is None:
         # Load and cache the vectorgrep library to prevent repeat loads within the process.
-        lib_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "lib", "libvectorgrep.so")
-        __libvectorgrep__ = ctypes.cdll.LoadLibrary(lib_path)
+        __libvectorgrep__ = ctypes.cdll.LoadLibrary(__libvectorgrep_path__)
     return __libvectorgrep__
 
 
@@ -121,6 +121,7 @@ def check_compatibility(
 
 def configure_libraries(
     libhs: str | None = None,
+    libvectorgrep: str | None = None,
     libzstd: str | None = None,
 ) -> None:
     """Set the paths to library files.
@@ -128,6 +129,7 @@ def configure_libraries(
     Args:
         libhs: Path to the vectorscan/hyperscan library object on the local system.
             Uses "libhs" moniker from Hyperscan until further notice.
+        libvectorgrep: Path to the libvectorgrep library object on the local system.
         libzstd: Path to the zstd library object on the local system.
     """
     if libhs:
@@ -135,6 +137,13 @@ def configure_libraries(
             raise ValueError("libhs already loaded, configuration overrides must be called before library usage")
         global __libvectorscan_path__  # pylint: disable=global-statement
         __libvectorscan_path__ = libhs
+    if libvectorgrep:
+        if __libvectorgrep__:
+            raise ValueError(
+                "libvectorgrep already loaded, configuration overrides must be called before library usage"
+            )
+        global __libvectorgrep_path__  # pylint: disable=global-statement
+        __libvectorgrep_path__ = libvectorgrep
     if libzstd:
         if __libzstd__:
             raise ValueError("libzstd already loaded, configuration overrides must be called before library usage")
@@ -344,9 +353,10 @@ def scan(  # pylint: disable=too-many-arguments
 
 
 # Call configuration update at least once to use defaults.
-if not __libvectorscan_path__:
+if not __libvectorgrep_path__:
     module = os.path.abspath(os.path.dirname(__file__))
     configure_libraries(
         libhs=os.path.join(module, "lib", "libhs.so.5.4.11"),
+        libvectorgrep=os.path.join(module, "lib", "libvectorgrep.so"),
         libzstd=os.path.join(module, "lib", "libzstd.so.1.5.5"),
     )
