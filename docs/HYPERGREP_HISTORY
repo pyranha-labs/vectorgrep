@@ -1,0 +1,47 @@
+9c6f2b2 Sun Jan 28 15:20:08 2024 -0700  chg: Prepare final feature release due to Hyperscan licensing change.
+137cf4d Sat Jan 27 13:27:22 2024 -0700  chg: Update compatibility information.
+5db459a Sat Jan 27 12:48:36 2024 -0700  new: Add test for parsing gz files.
+a38e06d Sat Jan 27 12:44:28 2024 -0700  new: Allow overriding hyperscan and zstd libraries used.
+2020f95 Sat Jan 27 12:01:58 2024 -0700  chg: Update hyperscan to 5.4.2.
+28dc932 Sat Jan 27 10:42:59 2024 -0700  chg: Update zstd to 1.5.5.
+fd086a2 Sat Jan 27 08:48:10 2024 -0700  chg: Condense package layout to simplify usage.
+3e7e98d Mon Jan 22 21:09:54 2024 -0700  chg: Reorganize build scripts for upcoming changes.
+108ba27 Sat Jan 20 15:20:20 2024 -0700  chg: Update integration with GitHub community guidelines.
+64b59fb Sat Jan 20 15:08:01 2024 -0700  version: 3.0.0
+788c70f Sat Jan 20 14:56:37 2024 -0700  chg: Simplify redundancies in module name.
+980aa5c Sun Jan 14 16:31:20 2024 -0700  new: Add simplified mark for paramtrizing large sets of test cases.
+c132606 Sat Jan 13 12:10:59 2024 -0700  chg: Update resource URLs.
+aaf59a6 Sat Nov 4 11:23:32 2023 -0600   chg: Update recipes to reduce dependency on git.
+d705182 Sat Aug 12 08:44:18 2023 -0600  chg: Remove bandit B101 ignore.
+80994c7 Sat Aug 12 08:23:34 2023 -0600  chg: Ensure venv site package configuration matches python bin. (#6)
+ed00164 Sat Aug 5 12:51:34 2023 -0600   version: 2.0.0
+e220680 Sat Aug 5 12:40:41 2023 -0600   chg: Update README with additional setup and build examples.
+38e46bc Sat Aug 5 12:31:52 2023 -0600   new: Add reusable pytest fixture for testing functions across all test files.
+8b15e14 Sat Aug 5 12:18:40 2023 -0600   chg: Apply full QA requirements and add pre-push enforcement.
+470148c Sat Aug 5 11:50:36 2023 -0600   new: Update setup files and requirements.
+fb39ee5 Mon Jan 30 17:52:17 2023 -0700  chg: Increase hyperscan default buffer size to allow more flexibility.
+0d69923 Tue Nov 30 01:13:33 2021 -0800  new: Allow Hyperscan to be provided pattern IDs to prevent redundant matches.
+cdb6b3a Mon Nov 29 19:49:21 2021 -0800  chg: Update raises in hyperscanner to be compliant with latest pylint.
+581da5a Sat Sep 25 17:14:15 2021 -0700  fix: Ensure python can receive signals during Hyperscan calls.
+4c8373f Mon Sep 20 20:52:36 2021 -0700  new: Add Only Matching option to hyperscanner.
+7846f61 Fri Aug 27 17:13:28 2021 -0700  new: Add silent option to hyperscanner to match grep behavior.
+ed90651 Mon Aug 23 20:20:52 2021 -0700  new: Add regex validation pass to hyperscanner using Hyperscan DB creation.
+35d1201 Mon Aug 16 19:08:28 2021 -0700  chg: Strip leading null characters off lines and add basic grep helper.
+435fac3 Sun Aug 15 19:14:23 2021 -0700  new: Add ability to load regexes from file to hyperscanner.
+9b5e680 Sat Aug 7 21:51:17 2021 -0700   new: Update zstd to 1.5.0 for latest speed enhancements.
+ab61fe8 Mon Jul 19 16:42:11 2021 -0600  fix: Prevent stacktraces from showing in hyperscanner when user interrupts.
+d550a32 Mon Jul 12 21:45:13 2021 -0600  new: Add validation pass after BRE conversion to hyperscanner to raise warning before hyperscan.
+02d5306 Fri Jul 9 17:32:24 2021 -0600   new: Add unit tests for hyperscanner output formatting combinations.
+c6b876c Tue Jul 6 17:43:11 2021 -0600   new: Add POSIX and GNU regular expression compatibility layers to hyperscanner.
+984f2e7 Mon Jul 5 18:13:42 2021 -0600   new: Add multiple regex pattern option to hyperscanner.
+1b7d9e3 Sat Jun 26 23:45:21 2021 -0600  chg: Minor input validation, printing, and multithreading enhancements.
+bab575b Sat Jun 26 23:32:11 2021 -0600  new: Add -a dummy option to hyperscanner for cross compatibility.
+52352ef Sat Jun 26 23:22:01 2021 -0600  new: Add option to use multiprocessing pool instead of multithreading to hyperscanner.
+c5a28d4 Sat Jun 26 22:45:23 2021 -0600  new: Add line batching to hyperscanner to improve performance of large results.
+fbe58ef Fri Jun 25 19:24:51 2021 -0600  chg: Speed up hyperscanner count and total options by not decoding bytes.
+c999fd9 Mon Jun 21 18:41:32 2021 -0600  new: Add ability to control flags passed hyperscan and ignore case to hyperscanner.
+304221a Sun Jun 6 11:13:33 2021 -0600   new: Add options for manually disabling and enabling filename in hyperscanner.
+1c20dc2 Sun Jun 6 19:31:52 2021 -0600   new: Add hyperscanner to search files in parallel via threads.
+49b275b Mon Apr 12 18:02:45 2021 -0600  new: Add ZSTD file support to hyperscanner.
+6f9dc20 Sat Jul 18 21:15:01 2020 -0600  new: Add ability to control hyperscan line buffer size.
+0a1a2ee Sun Aug 25 20:10:40 2019 -0600  new: Initial commit.

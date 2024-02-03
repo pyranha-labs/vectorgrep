@@ -1,4 +1,4 @@
-"""Set up configuration and dependencies for the hypergrep library."""
+"""Set up configuration and dependencies for the vectorgrep library."""
 
 import os
 from pathlib import Path
@@ -31,16 +31,16 @@ def read_requirements_file(extra_type: str | None) -> list[str]:
 
 
 setup(
-    name="hypergrep",
-    description="Utilities for rapid text file processing using Intel Hyperscan in Python",
+    name="vectorgrep",
+    description="Utilities for rapid text file processing using Vectorscan/Hyperscan in Python",
     long_description=Path("README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
-    version=_find_version("hypergrep"),
+    version=_find_version("vectorgrep"),
     author="David Fritz",
-    url="https://github.com/pyranha-labs/hypergrep",
+    url="https://github.com/pyranha-labs/vectorgrep",
     project_urls={
-        "Issue Tracker": "https://github.com/pyranha-labs/hypergrep/issues",
-        "Source Code": "https://github.com/pyranha-labs/hypergrep",
+        "Issue Tracker": "https://github.com/pyranha-labs/vectorgrep/issues",
+        "Source Code": "https://github.com/pyranha-labs/vectorgrep",
     },
     license="MIT",
     classifiers=[
@@ -62,7 +62,7 @@ setup(
         "Linux",
     ],
     test_suite="pytest",
-    packages=find_packages(ROOT_DIR, include=["hypergrep*"], exclude=["*test", "tests*"]),
+    packages=find_packages(ROOT_DIR, include=["vectorgrep*"], exclude=["*test", "tests*"]),
     include_package_data=True,
     python_requires=">=3.10",
     extras_require={
@@ -72,7 +72,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "hypergrep = hypergrep.multiscanner:main",
+            "vectorgrep = vectorgrep.multiscanner:main",
         ]
     },
 )

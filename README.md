@@ -1,4 +1,4 @@
-# HyperGrep
+# VectorGrep
 
 [![os: linux](https://img.shields.io/badge/os-linux-blue)](https://docs.python.org/3.10/)
 [![python: 3.10+](https://img.shields.io/badge/python-3.10_|_3.11-blue)](https://devguide.python.org/versions)
@@ -13,13 +13,21 @@
 [![security: bandit](https://img.shields.io/badge/security-bandit-black)](https://github.com/PyCQA/bandit)
 [![license: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
-HyperGrep is a fast (Hyperspeed) Global Regular Expression Processing library for Python. It uses Intel Hyperscan
-to maximize performance, and can be used with multi-threaded or multi-processed applications. While a standard grep
-if designed to print, this is designed to allow full control over processing matches. The library supports scanning
-plaintext, gzip, and ztsd compressed files for regular expressions, and customizing the action to take when matched.
+VectorGrep is a high-performance (Vectorized) Global Regular Expression "Processing" library for Python. It uses
+Vectorscan (a portable fork of Intel Hyperscan) to maximize performance, and can be used with multithreaded
+or multiprocessed applications. VectorGrep is also home to `vectorgrep` (Vectorized Global Regular Expression Printer),
+a multithreaded/multi-file "grep" command to search many files in parallel. It can often be used as a drop in
+replacement for `grep/egrep/zgrep` etc.
 
-For full information on the amazing performance that can be obtained through Intel Hyperscan with, refer to:  
-[Hyperscan](https://github.com/intel/hyperscan)
+While a standard "grep" is designed to "print", VectorGrep is designed to allow full control over "processing".
+It supports scanning compressed, or uncompressed, text files for regular expressions, and customizing the action
+to take when a match is found. For full information about the performance of Vectorscan (and Hyperscan), refer to:  
+[VectorCamp: Vectorscan](https://github.com/VectorCamp/vectorscan)  
+[Intel: Hyperscan](https://github.com/intel/hyperscan)
+
+VectorGrep also is the successor to [HyperGrep](https://github.com/pyranha-labs/hypergrep). It is designed to be
+a drop in replacement for the original during initial releases. Refer to the [FAQ](#faq) for more information
+about this change.
 
 
 ## Table Of Contents
@@ -37,11 +45,11 @@ For full information on the amazing performance that can be obtained through Int
 ## Key Features
 
 - **Simplicity**
-  - No experience with Hyperscan required. Provides "grep" styled interfaces.
+  - No experience with Vectorscan/Hyperscan required. Provides "grep" styled interfaces.
   - No external dependencies, and no building required (on natively supported platforms).
   - Built in support for compressed and uncompressed files.
 - **Speed**
-  - Uses Hyperscan, a high-performance multiple regex matching library.
+  - Uses Vectorscan/Hyperscan, a high-performance multiple regex matching library.
   - Performs read and regex operations outside Python.
   - Batches results for Python, reducing overhead (customizable).
 - **Parallelism**
@@ -53,11 +61,11 @@ For full information on the amazing performance that can be obtained through Int
 
 - Supports Python 3.10+
 - Supports Linux systems with x86_64 architecture
-  - Tested on Ubuntu Trusty (14.04) and above
+  - Tested on Ubuntu Bionic (18.04) and above
   - Other Linux distros may work, but are not guaranteed
   - May be able to be built on Windows/OSX manually
   - More platforms are planned to be supported (natively) in the future
-- Some regex constructs are not supported by Hyperscan in order to guarantee stable performance
+- Some regex constructs are not supported by Vectorscan/Hyperscan in order to guarantee stable performance
   - For more information refer to: [Unsupported Constructs](https://intel.github.io/hyperscan/dev-reference/compilation.html#unsupported-constructs)
 
 
@@ -65,15 +73,15 @@ For full information on the amazing performance that can be obtained through Int
 
 ### Installation
 
-- Install HyperGrep via pip:
+- Install VectorGrep via pip:
     ```shell
-    pip install hypergrep
+    pip install vectorgrep
     ```
 
 - Or via git clone:
     ```shell
     git clone <path to fork>
-    cd hypergrep
+    cd vectorgrep
     pip install .
     ```
 
@@ -81,49 +89,49 @@ For full information on the amazing performance that can be obtained through Int
     ```shell
     # Build locally.
     git clone <path to fork>
-    cd hypergrep
+    cd vectorgrep
     make wheel
     
-    # Push dist/hypergrep*.tar.gz to environment where it will be installed.
-    pip install dist/hypergrep*.tar.gz
+    # Push dist/vectorgrep*.tar.gz to environment where it will be installed.
+    pip install dist/vectorgrep*.tar.gz
     ```
 
 ### Examples
 
 - Read one file with the example single threaded command:
     ```shell
-    # hypergrep/scanner.py <regex> <file>
-    hypergrep/scanner.py pattern ./hypergrep/scanner.py
+    # vectorgrep/scanner.py <regex> <file>
+    vectorgrep/scanner.py pattern ./vectorgrep/scanner.py
     ```
 
 - Read multiple files with the multithreaded command (drop in replacement for `grep` where patterns are compatible):
     ```shell
     # From install:
-    # hypergrep <regex> <file(s)>
-    hypergrep pattern ./hypergrep/scanner.py
+    # vectorgrep <regex> <file(s)>
+    vectorgrep pattern ./vectorgrep/scanner.py
 
     # From package:
-    # hypergrep/multiscanner.py <regex> <file>
-    hypergrep/multiscanner.py pattern ./hypergrep/scanner.py
+    # vectorgrep/multiscanner.py <regex> <file>
+    vectorgrep/multiscanner.py pattern ./vectorgrep/scanner.py
     ```
 
 - Collect all matches from a file, similar to grep, and perform a custom operation on results:
     ```python
-    import hypergrep
+    import vectorgrep
     
-    file = "./hypergrep/scanner.py"
+    file = "./vectorgrep/scanner.py"
     pattern = 'pattern'
     
-    results, return_code = hypergrep.grep(file, [pattern])
+    results, return_code = vectorgrep.grep(file, [pattern])
     for index, line in results:
         print(f'{index}: {line}')
     ```
 
 - Manually scan a file and perform a custom operation on match:
     ```python
-    import hypergrep
+    import vectorgrep
     
-    file = "./hypergrep/scanner.py"
+    file = "./vectorgrep/scanner.py"
     pattern = 'pattern'
 
     def on_match(matches: list, count: int) -> None:
@@ -132,15 +140,15 @@ For full information on the amazing performance that can be obtained through Int
             line = match.line.decode(errors='ignore')
             print(f'Custom print: {line.rstrip()}')
     
-    hypergrep.scan(file, [pattern], on_match)
+    vectorgrep.scan(file, [pattern], on_match)
     ```
 
 - Override the `libhs` and/or `libzstd` libraries to use files outside the package.
-Must be called before any other usage of `hypergrep`:
+Must be called before any other usage of `vectorgrep`:
     ```python
-    import hypergrep
+    import vectorgrep
 
-    hypergrep.configure_libraries(
+    vectorgrep.configure_libraries(
         libhs='/home/myuser/libhs.so.mybuild',
         libzstd='/home/myuser/libzstd.so.mybuild',
     )
@@ -157,15 +165,15 @@ Refer to [How Tos](docs/HOW_TO.md) for more advanced topics, such as building th
 
 ## FAQ
 
-#### Q: How does HyperGrep compare to other Hyperscan python libraries?
+#### Q: How does VectorGrep compare to other Vectorscan/Hyperscan python libraries?
 
-**A:** HyperGrep has a specific goal: provide a high performance "grep" like interface in python,
-but with more control. It is not intended to be a full set of bindings to Hyperscan. If you need
+**A:** VectorGrep has a specific goal: provide a high performance "grep" like interface in python,
+but with more control. It is not intended to be a full set of bindings to Vectorscan/Hyperscan. If you need
 full control over the low level backend, there are other python libraries intended for that use case. Here are
 a few of the reasons for the focused goal of this library:
 
 - Simplify developer integration.
-  - No experience with Hyperscan required.
+  - No experience with Vectorscan/Hyperscan required.
   - Familiarity with `grep` variants beneficial, but not required.
 - Avoid messy subprocess chains common in "parallel grep" implementations.
   - Commands like `zgrep` are actually a `zcat` + `grep`. This can lead to 3+ processes per file read.
@@ -176,14 +184,14 @@ a few of the reasons for the focused goal of this library:
   - Provide the pattern matched in multi-regex searches, without having to repeat the search in Python.
 
 When it comes to performance, here is an example of the benefit of this design. Due to the performance of
-Hyperscan, it is also often faster than native `grep` variants, even while using python. Scenario setup:
+Vectorscan/Hyperscan, it is also often faster than native `grep` variants, even while using python. Scenario setup:
 - 2.10GHz Intel x86_64 Processor
 - ~17M line file (~300M gzip compressed, ~3G uncompressed).
 - ~800 PCRE patterns.
 - Counting only, no extra processing of lines.
 - Each job run 5 times and averaged (lower is better).
 
-|   | Scenario (Uncompressed timings in parenthesis) | HyperGrep     | Full bindings     | zgrep (grep)  |
+|   | Scenario (Uncompressed timings in parenthesis) | VectorGrep    | Full bindings     | zgrep (grep)  |
 |---|------------------------------------------------|---------------|-------------------|---------------|
 | 1 | ~90K matches, 1 pattern                        | 8.2s (2.5s)   | 22.8s (15.5s)     | 12.5s (5.2s)  |
 | 2 | ~900K matches, 10 patterns                     | 9.7s (3.8s)   | 25.7s (16.8s)     | 19.8s (17.3s) |
@@ -191,3 +199,20 @@ Hyperscan, it is also often faster than native `grep` variants, even while using
 | 4 | Scenario #3 (x4 files), 1 process (4 threads)  | 49.6s (46.8s) | 1432.6s (1302.2s) | *             |
 
 * GNU grep does not allow multiple PCRE patterns natively, and concatenation via "or" failed.
+
+#### Q: Why was Vectorscan forked from Hyperscan?
+
+**A:** Vectorscan was originally created to provide a portable fork of Hyperscan, and allow running on other
+architectures such as ARM. Intel changed the license of Hyperscan from BSD to IPL (Intel Proprietary License)
+starting in 5.5, while Vectorscan continues to provide updates and remain fully open source. For more information:  
+[Vectorscan: Why was there a need for a fork?](https://github.com/VectorCamp/vectorscan#why-was-there-a-need-for-a-fork)  
+[Vectorscan: Hyperscan license change](https://github.com/VectorCamp/vectorscan#hyperscan-license-change-after-54)
+
+#### Q: Why is VectorGrep not a fork of HyperGrep?
+
+**A:** HyperGrep receives maintenance updates, but over time it will become a different solution from
+VectorGrep, and eventually become no longer updated, due to the licensing changes made by Intel to Hyperscan. In order
+to keep the responsibilities of each clearly separated, and avoid any confusion about backports or feature requests,
+it was decided to make a "clean cut" of HyperGrep, instead of using a "fork". There are no plans to backport any
+features from VectorGrep to HyperGrep. VectorGrep starts from HyperGrep commit 9c6f2b2. The original commit
+history can be found in [HyperGrep History](docs/HYPERGREP_HISTORY)
