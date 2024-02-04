@@ -61,11 +61,12 @@ about this change.
 
 - Supports Python 3.10+
 - Supports Linux systems with x86_64 architecture
-  - Ubuntu Focal (20.04) and above out of the box
+  - Ubuntu Focal (20.04), Debian Bullseye (11), and above out of the box
   - Ubuntu Trusty (14.04) and above with gcc-9/g++-9 installed
-  - Other Linux distros may work, but are not guaranteed
-  - May be able to be built on Windows/OSX manually
-  - More platforms are planned to be supported (natively) in the future
+  - Other Operating System configurations may work, but are not tested/guaranteed
+    - Linux distros other than Debian/Ubuntu should work, assuming GLIBC is high enough
+    - May be able to be built on Windows/OSX manually
+    - More platforms are planned to be supported (natively) in the future
 - Some regex constructs are not supported by Vectorscan/Hyperscan in order to guarantee stable performance
   - For more information refer to: [Unsupported Constructs](https://intel.github.io/hyperscan/dev-reference/compilation.html#unsupported-constructs)
 
@@ -200,6 +201,19 @@ Vectorscan/Hyperscan, it is also often faster than native `grep` variants, even 
 | 4 | Scenario #3 (x4 files), 1 process (4 threads)  | 49.6s (46.8s) | 1432.6s (1302.2s) | *             |
 
 * GNU grep does not allow multiple PCRE patterns natively, and concatenation via "or" failed.
+
+#### Q: How do I make a custom build for a system other than Linux x86_64?
+
+**A**: Refer to [How To: Build the libraries for different architectures](docs/HOW_TO.md#build-the-libraries-for-different-architectures)
+
+#### Q: I only have an ARM CPU, can I build/run the x86_64 libraries?
+
+**A**: Depends. The current production build supports native x86_64 CPUs, as well as virtualized (in most scenarios).
+For example, if you are on a Mac M1/M2/etc., you can use Docker and a supported image in x64 mode with
+`--platform linux/amd64`. Performance may vary however, as the code is running through virtual machine emulation.
+This process can also be used to build new libraries if your system is set up properly for emulation.
+Refer to [How To: Build the libraries for different architectures](docs/HOW_TO.md#build-the-libraries-for-different-architectures)
+for more information about supporting additional environments (natively or through emulation) besides Linux x86_64.
 
 #### Q: Why was Vectorscan forked from Hyperscan?
 
