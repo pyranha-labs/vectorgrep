@@ -1,0 +1,190 @@
+[project]
+name = "vectorgrep"
+description = "Utilities for rapid text file processing using Vectorscan/Hyperscan in Python"
+readme = "README.md"
+dynamic = ["version"]
+authors = [
+    { name = "David Fritz" },
+]
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["regex", "logs", "hyperscan", "vectorscan"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
+    "Operating System :: POSIX :: Linux",
+]
+
+[project.urls]
+Home = "https://github.com/pyranha-labs/vectorgrep"
+Changelog = "https://github.com/pyranha-labs/vectorgrep/releases"
+Issues = "https://github.com/pyranha-labs/vectorgrep/issues"
+
+[project.scripts]
+vectorgrep = "vectorgrep.multiscanner:main"
+
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+packages = { find = { where = ["."], include = ["vectorgrep*"], exclude = ["*test", "tests*"] } }
+platforms = [
+    "Linux",
+]
+
+[tool.setuptools.dynamic]
+version = { attr = "vectorgrep.__version__" }
+readme = { file = ["README.md"] }
+
+[tool.bandit]
+exclude_dirs = [
+    ".venv",
+    "venv",
+    "test",
+]
+targets = [
+    "vectorgrep",
+]
+
+[tool.coverage.report]
+fail_under = 80
+
+[tool.coverage.run]
+branch = true
+
+[tool.pydocstyle]
+convention = "google"
+match-dir = '^(?!\.|venv).*'
+# PEP257 "D204 1 blank line after class docstring" is inconsistent depending on pydocstyle version. Add for consistency.
+add-select = "D204"
+
+[tool.pylint]
+# Pylint requires a full list of disables, or a full list of includes, and cannot be partially overridden.
+# The following list starts with the pylint defaults, followed by project specifics.
+# Do not modify the pylint defaults without adding a comment as to why, and only comment out instead of remove.
+disable = [
+    "raw-checker-failed",
+    "bad-inline-option",
+    "locally-disabled",
+    "file-ignored",
+    "suppressed-message",
+    "useless-suppression",
+    "deprecated-pragma",
+    "use-symbolic-message-instead",
+    # Vectorgrep specific modifications.
+    # W1203, allow f-strings to be used in logging messages.
+    "logging-fstring-interpolation",
+    # C0301 line too long, up to maintainers' best judgement.
+    "line-too-long",
+    # R0801 duplicate code, up to maintainers' best judgement.
+    "duplicate-code",
+    # R0903 too-few-public-methods, custom classes are allowed to have low amount of public functions.
+    "too-few-public-methods",
+]
+
+[tool.pylint.MASTER]
+# Skip test files from lint to avoid littering with unecessary ignores.
+# Test files are known to perform logic that is often non-standard in order to test all scenarios.
+ignore = ["test"]
+# Use jobs 0 to autodetect CPUs on system for parallel performance.
+jobs = 0
+
+[tool.pylint.DESIGN]
+max-args = 6
+max-attributes = 10
+
+[tool.pytest.ini_options]
+norecursedirs = [".*", "venv"]
+filterwarnings = [
+    # Promote all warnings to errors to ensure performance, forwards compatibility, and code quality.
+    "error"
+]
+markers = [
+    "parametrize_test_case: Mark test as paramtrized with an object that auto generates values and ids based on type.",
+    "no_file_load: Control whether test allow loading file contents from the local filesystem."
+]
+
+[tool.mypy]
+ignore_missing_imports = true
+warn_unused_configs = true
+show_error_codes = true
+incremental = false
+follow_imports = "skip"
+# There is no option for an enable list, so a full disable list must be provided instead.
+disable_error_code = [
+    "attr-defined",
+    "name-defined",
+    "call-arg",
+    "arg-type",
+    "call-overload",
+    "valid-type",
+    "var-annotated",
+    "override",
+    "return",
+    "return-value",
+    "assignment",
+    "type-arg",
+    "type-var",
+    "union-attr",
+    "index",
+    "operator",
+    "list-item",
+    "dict-item",
+    "typeddict-item",
+    "has-type",
+    "import",
+    "no-redef",
+    "func-returns-value",
+    "abstract",
+    "valid-newtype",
+    "str-format",
+    "str-bytes-safe",
+    "exit-return",
+    "no-untyped-call",
+    "redundant-cast",
+    "comparison-overlap",
+    "no-any-unimported",
+    "no-any-return",
+    "unreachable",
+    "name-match",
+    "syntax",
+    "misc",
+]
+disallow_untyped_defs = true
+
+# Ruff is currently only used as a replacement for pycodestyle, black, and isort.
+# pydocstyle and pylint are used separately to maximize coverage.
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "I", # isort
+    "E", # pycodestyle
+    "W", # pycodestyle
+]
+ignore = [
+    # Ignore E402 import not at top of file. Pylint will catch, and we do not want double ignore lines in the code.
+    # Ignore E501 line too long. Up to maintainers best judgement.
+    # Ignore E722 bare except. Pylint will catch, and we do not want double ignore lines in the code.
+    "E402",
+    "E501",
+    "E722",
+]
+# Preview required for pycodestyle rules as of ruff 0.2.2.
+preview = true
+
+[tool.ruff.lint.isort]
+force-single-line = true
