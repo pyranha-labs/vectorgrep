@@ -213,10 +213,6 @@ TEST_CASES = {
             "args": [
                 TEST_FILE,
                 ["bar"],
-                False,
-                False,
-                False,
-                False,
             ],
             "returns": (
                 [
@@ -230,10 +226,6 @@ TEST_CASES = {
             "args": [
                 TEST_FILE_GZ,
                 ["bar"],
-                False,
-                False,
-                False,
-                False,
             ],
             "returns": (
                 [
@@ -247,10 +239,6 @@ TEST_CASES = {
             "args": [
                 TEST_FILE_ZST,
                 ["bar"],
-                False,
-                False,
-                False,
-                False,
             ],
             "returns": (
                 [
@@ -268,10 +256,7 @@ TEST_CASES = {
                 ["foobar"],
             ],
             "kwargs": {
-                "count_results": False,
-                "total_results": False,
                 "with_file_name": True,
-                "with_line_number": False,
             },
             "returns": [
                 "greptest1.txt:foobar",
@@ -283,8 +268,6 @@ TEST_CASES = {
                 ["foobar"],
             ],
             "kwargs": {
-                "count_results": False,
-                "total_results": False,
                 "with_file_name": True,
                 "with_line_number": True,
             },
@@ -299,9 +282,7 @@ TEST_CASES = {
             ],
             "kwargs": {
                 "count_results": True,
-                "total_results": False,
                 "with_file_name": True,
-                "with_line_number": False,
             },
             "returns": [
                 "greptest1.txt:16",
@@ -313,10 +294,8 @@ TEST_CASES = {
                 ["foo"],
             ],
             "kwargs": {
-                "count_results": False,
                 "total_results": True,
                 "with_file_name": True,
-                "with_line_number": False,
             },
             "returns": [
                 # It is expected for total to not show a file name, it is a total. This ensures expected behavior.
@@ -329,9 +308,6 @@ TEST_CASES = {
                 ["foobar"],
             ],
             "kwargs": {
-                "count_results": False,
-                "total_results": False,
-                "with_file_name": False,
                 "with_line_number": True,
             },
             "returns": [
@@ -345,9 +321,6 @@ TEST_CASES = {
             ],
             "kwargs": {
                 "count_results": True,
-                "total_results": False,
-                "with_file_name": False,
-                "with_line_number": False,
             },
             "returns": [
                 "16",
@@ -359,13 +332,24 @@ TEST_CASES = {
                 ["foo"],
             ],
             "kwargs": {
-                "count_results": False,
                 "total_results": True,
-                "with_file_name": False,
-                "with_line_number": False,
             },
             "returns": [
                 "16",
+            ],
+        },
+        "single file, stop on non-zero match count": {
+            "args": [
+                [GREP_FILE_1],
+                ["foo"],
+            ],
+            "kwargs": {
+                "max_match_count": 3,
+            },
+            "returns": [
+                "foo",
+                "foobar",
+                "[foo]",
             ],
         },
         "multi file, with file name": {
@@ -374,10 +358,7 @@ TEST_CASES = {
                 ["foobar"],
             ],
             "kwargs": {
-                "count_results": False,
-                "total_results": False,
                 "with_file_name": True,
-                "with_line_number": False,
             },
             "returns": [
                 "greptest1.txt:foobar",
@@ -390,8 +371,6 @@ TEST_CASES = {
                 ["foobar"],
             ],
             "kwargs": {
-                "count_results": False,
-                "total_results": False,
                 "with_file_name": True,
                 "with_line_number": True,
             },
@@ -407,9 +386,7 @@ TEST_CASES = {
             ],
             "kwargs": {
                 "count_results": True,
-                "total_results": False,
                 "with_file_name": True,
-                "with_line_number": False,
             },
             "returns": [
                 "greptest1.txt:16",
@@ -422,10 +399,8 @@ TEST_CASES = {
                 ["foo"],
             ],
             "kwargs": {
-                "count_results": False,
                 "total_results": True,
                 "with_file_name": True,
-                "with_line_number": False,
             },
             "returns": [
                 # It is expected for total to not show a file name, it is a total. This ensures expected behavior.
@@ -438,9 +413,6 @@ TEST_CASES = {
                 ["foobar"],
             ],
             "kwargs": {
-                "count_results": False,
-                "total_results": False,
-                "with_file_name": False,
                 "with_line_number": True,
             },
             "returns": [
@@ -455,9 +427,6 @@ TEST_CASES = {
             ],
             "kwargs": {
                 "count_results": True,
-                "total_results": False,
-                "with_file_name": False,
-                "with_line_number": False,
             },
             "returns": [
                 "16",
@@ -470,13 +439,27 @@ TEST_CASES = {
                 ["foo"],
             ],
             "kwargs": {
-                "count_results": False,
                 "total_results": True,
-                "with_file_name": False,
-                "with_line_number": False,
             },
             "returns": [
                 "32",
+            ],
+        },
+        "multi file, stop on non-zero match count": {
+            "args": [
+                [GREP_FILE_1, GREP_FILE_2],
+                ["foo"],
+            ],
+            "kwargs": {
+                "with_file_name": True,
+                "with_line_number": True,
+                "max_match_count": 2,
+            },
+            "returns": [
+                "greptest1.txt:2:foo",
+                "greptest1.txt:3:foobar",
+                "greptest2.txt:2:foo",
+                "greptest2.txt:3:foobar",
             ],
         },
         "case sensitive": {
@@ -484,7 +467,6 @@ TEST_CASES = {
                 [GREP_FILE_1],
                 ["fOoBaR"],
             ],
-            "kwargs": {"ignore_case": False},
             "returns": [
                 # No match expected.
             ],
@@ -547,7 +529,6 @@ TEST_CASES = {
                 [GREP_FILE_1],
                 ["grep file to test|sync with"],
             ],
-            "kwargs": {"only_matching": False},
             "returns": [
                 "# Primary grep file to test patterns. Keep in sync with greptest2.txt.",
                 "# Primary grep file to test patterns. Keep in sync with greptest2.txt.",

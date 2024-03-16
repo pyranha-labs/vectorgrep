@@ -56,11 +56,13 @@ typedef void (*hs_event) (vectorgrep_result_t* results, int result_count);
 /*
  * Stateful information used to track additional information from Vectorscan during callbacks.
  *
+ * match_count: Total number of matches found since starting scan.
  * line_number: The index of the line matched.
  * line: Contents of the line that was matched.
  * callback: Function to call with simplified match information from Vectorscan.
  */
 typedef struct vectorgrep_state {
+    unsigned long long match_count;
     unsigned long long line_number;
     char* line;
     hs_event callback;
@@ -80,6 +82,7 @@ typedef struct vectorgrep_state {
  */
 static int hs_callback(unsigned int id, unsigned long long start, unsigned long long end, unsigned int flags, void *ctx) {
     vectorgrep_state_t* state = (vectorgrep_state_t*) ctx;
+    state->match_count++;
 
     // Update the next result in the buffer, without calling the callback, to help reduce possible overhead.
     state->result_index++;
@@ -171,8 +174,16 @@ int check_patterns(
  * db: A compiled Vectorscan pattern database.
  * scratch: A per-thread Vectorscan scratch space allocated for this database.
  * buffer_size: How large of a char buffer to use while reading in strings. Reads up to first newline or len - 1.
+ * max_match_count: Stop reading the file after requested number of matches found.
  */
-int vectorscan_gz(char* file_name, vectorgrep_state_t* state, hs_database_t* db, hs_scratch_t* scratch, int buffer_size) {
+int vectorscan_gz(
+    char* file_name,
+    vectorgrep_state_t* state,
+    hs_database_t* db,
+    hs_scratch_t* scratch,
+    int buffer_size,
+    unsigned long long max_match_count
+) {
     int ret = 0;
 
     // To avoid manual line scanning, use zlib gz* functions to open files and read into buffer.
@@ -208,6 +219,9 @@ int vectorscan_gz(char* file_name, vectorgrep_state_t* state, hs_database_t* db,
             ret = VECTORGREP_SCAN;
             break;
         }
+        if (max_match_count > 0 && state->match_count >= max_match_count) {
+            break;
+        }
         state->line_number++;
     }
     gzclose(input_file);
@@ -229,6 +243,7 @@ int vectorscan_gz(char* file_name, vectorgrep_state_t* state, hs_database_t* db,
  * on_event: Function to call with simplified match information from Vectorscan.
  * buffer_size: How large of a char buffer to use while reading in strings. Reads up to first newline or len - 1.
  * buffer_count: How many buffers should be used to batch on_event results. Total memory = buffer_size * buffer_count.
+ * max_match_count: Stop reading the file after requested number of matches found.
  */
 int vectorscan(
     char* file_name,
@@ -238,8 +253,13 @@ int vectorscan(
     const unsigned int elements,
     hs_event on_event,
     const int buffer_size,
-    const int buffer_count
+    int buffer_count,
+    unsigned long long max_match_count
 ) {
+    if (max_match_count > 0 && max_match_count < buffer_count) {
+        // If there is a low cap on allowed matches, decrease the buffer size to optimize memory usage.
+        buffer_count = max_match_count;
+    }
     int ret = 0;
 
     // Initialize the Vectorscan database, scratch, and state. If any cannot be created, skip processing.
@@ -248,6 +268,7 @@ int vectorscan(
         ret = VECTORGREP_STATE_MEM;
         goto cleanup;
     }
+    state->match_count = 0;
     state->line_number = 0;
     state->callback = on_event;
 
@@ -284,7 +305,7 @@ int vectorscan(
     }
 
     // Route scan based on file type to isolate dynamic buffer allocation scope.
-    ret = vectorscan_gz(file_name, state, db, scratch, buffer_size);
+    ret = vectorscan_gz(file_name, state, db, scratch, buffer_size, max_match_count);
 
     // Ensure the buffer is sent if there are any remaining results.
     if (state->result_index != -1) {
@@ -328,7 +349,7 @@ int main(int argc, char *argv[]) {
         // HS_FLAG_SINGLEMATCH to stop after first callback for a pattern.
         pattern_flags[i - 2] = HS_FLAG_DOTALL | HS_FLAG_MULTILINE | HS_FLAG_SINGLEMATCH;
         pattern_ids[i - 2] = i - 2;
-        ret = vectorscan(input_file, patterns, pattern_flags, pattern_ids, 1, event_handler, 65535, 256);
+        ret = vectorscan(input_file, patterns, pattern_flags, pattern_ids, 1, event_handler, 65535, 256, 0);
     }
     return ret;
 }

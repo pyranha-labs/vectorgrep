@@ -15,10 +15,10 @@ from typing import Iterable
 import vectorgrep
 
 
-def _grep_with_index(index: int, args: Iterable) -> tuple[int, Any]:
+def _grep_with_index(index: int, args: Iterable, kwargs: dict[str, Any]) -> tuple[int, Any]:
     """Wrapper to run grep and return with an index representing the job ID."""
     try:
-        result = vectorgrep.grep(*args)
+        result = vectorgrep.grep(*args, **kwargs)
     except Exception as error:  # pylint: disable=broad-except
         result = error
     return index, result
@@ -95,6 +95,7 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
     use_multithreading: bool = True,
     only_matching: bool = False,
     no_messages: bool = False,
+    max_match_count: int = 0,
 ) -> None:
     """Search files for a regex pattern and print the results based on user requested formatting.
 
@@ -110,6 +111,8 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
         use_multithreading: Whether to use multithreading pool instead of multiprocessing.
         only_matching: Save only the matched (non-empty) parts of a matching line, with each part on a separate line.
         no_messages: Suppress error messages about nonexistent or unreadable files.
+        max_match_count: Stop reading the file after requested number of matches found.
+            Use 0 to indicate no limit. Limit is per file to match grep behavior.
     """
     pending = {}
     total = 0
@@ -157,8 +160,15 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
     with ThreadPool(processes=workers) if use_multithreading else multiprocessing.Pool(processes=workers) as pool:
         jobs = []
         for index, file in enumerate(files):
-            args = (file, patterns, ignore_case, count_results or total_results, only_matching, no_messages)
-            jobs.append(pool.apply_async(_grep_with_index, (index, args), callback=_on_grep_finish))
+            args = (file, patterns)
+            kwargs = {
+                "ignore_case": ignore_case,
+                "count_only": count_results or total_results,
+                "only_matching": only_matching,
+                "no_messages": no_messages,
+                "max_match_count": max_match_count,
+            }
+            jobs.append(pool.apply_async(_grep_with_index, (index, args, kwargs), callback=_on_grep_finish))
         for job in jobs:
             job.get()
 
@@ -379,6 +389,13 @@ def parse_args(args: list = None) -> argparse.Namespace:
         help="Suppress normal output; instead print a count of matching lines for each input file.",
     )
     output_args.add_argument(
+        "-m",
+        "--max-count",
+        type=int,
+        default=0,
+        help="Stop reading a file after NUM matching lines. When the -c or --count option is also used, grep does not output a count greater than NUM.",
+    )
+    output_args.add_argument(
         "-o",
         "--only-matching",
         action="store_true",
@@ -513,6 +530,7 @@ def main() -> None:
         use_multithreading=args.use_multithreading,
         only_matching=args.only_matching,
         no_messages=args.no_messages,
+        max_match_count=args.max_count,
     )
 
 
