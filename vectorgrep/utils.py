@@ -159,6 +159,7 @@ def grep(  # pylint: disable=too-many-arguments
     only_matching: bool = False,
     no_messages: bool = False,
     errors: str = "ignore",
+    max_match_count: int = 0,
 ) -> tuple[int | list[tuple[int, str]], int]:
     """Basic reusable grep like function using Vectorscan.
 
@@ -174,6 +175,8 @@ def grep(  # pylint: disable=too-many-arguments
         no_messages: Suppress error messages about nonexistent or unreadable files.
         errors: Error handling scheme to use for the handling of decoding errors.
             Refer to python "bytes.decode()" for more information.
+        max_match_count: Stop reading the file after requested number of matches found.
+            Use 0 to indicate no limit.
 
     Returns:
         Line count, or list of tuples with the line index and matching line, and return code.
@@ -223,7 +226,13 @@ def grep(  # pylint: disable=too-many-arguments
         flags = HS_FLAG_DOTALL | HS_FLAG_MULTILINE | HS_FLAG_SINGLEMATCH
         if ignore_case:
             flags |= HS_FLAG_CASELESS
-        return_code = scan(file, patterns, _c_callback, flags=[flags for _ in patterns])
+        return_code = scan(
+            file,
+            patterns,
+            _c_callback,
+            flags=[flags for _ in patterns],
+            max_match_count=max_match_count,
+        )
     else:
         return_code = 1
     return results, return_code
@@ -295,6 +304,7 @@ def scan(  # pylint: disable=too-many-arguments
     ids: list[int] = (),
     buffer_size: int = 262140,
     buffer_count: int = 16,
+    max_match_count: int = 0,
 ) -> int:
     """Read a text file for regex patterns using Vectorscan.
 
@@ -316,6 +326,8 @@ def scan(  # pylint: disable=too-many-arguments
             Basic guidelines:
                 Multithreading + millions of matches = increase limit.
                 Multiprocessing or few matches = decrease limit or leave as is.
+        max_match_count: Stop reading the file after requested number of matches found.
+            Use 0 to indicate no limit.
 
     Returns:
         Response code received from the C backend if there was a failure, 0 otherwise.
@@ -340,6 +352,7 @@ def scan(  # pylint: disable=too-many-arguments
             callback,
             buffer_size,
             buffer_count,
+            ctypes.c_ulonglong(max_match_count),
         )
 
     vectorscan_thread = threading.Thread(target=_wrapper, daemon=True)
