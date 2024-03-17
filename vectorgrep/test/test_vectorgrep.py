@@ -798,6 +798,114 @@ TEST_CASES = {
                 2,
             ),
         },
+        "match, files without match": {
+            "args": [
+                [
+                    GREP_FILE_1,
+                    GREP_FILE_2,
+                ],
+                ["greptest2"],
+            ],
+            "kwargs": {
+                "files_without_match": True,
+            },
+            "returns": (
+                [
+                    "greptest2.txt",
+                ],
+                0,
+            ),
+        },
+        "match, files with match": {
+            "args": [
+                [
+                    GREP_FILE_1,
+                    GREP_FILE_2,
+                ],
+                ["greptest2"],
+            ],
+            "kwargs": {
+                "files_with_matches": True,
+            },
+            "returns": (
+                [
+                    "greptest1.txt",
+                ],
+                0,
+            ),
+        },
+        "no match, files without match": {
+            "args": [
+                [
+                    GREP_FILE_1,
+                    GREP_FILE_2,
+                ],
+                ["greptest2asdf"],
+            ],
+            "kwargs": {
+                "files_without_match": True,
+            },
+            "returns": (
+                ["greptest1.txt", "greptest2.txt"],
+                1,
+            ),
+        },
+        "no match, files with match": {
+            "args": [
+                [
+                    GREP_FILE_1,
+                    GREP_FILE_2,
+                ],
+                ["greptest2asdf"],
+            ],
+            "kwargs": {
+                "files_with_matches": True,
+            },
+            "returns": (
+                [],
+                1,
+            ),
+        },
+        "files without match and error": {
+            "args": [
+                [
+                    GREP_FILE_1 + "a",
+                    GREP_FILE_1,
+                    GREP_FILE_2,
+                ],
+                ["greptest2"],
+            ],
+            "kwargs": {
+                "files_without_match": True,
+            },
+            "returns": (
+                [
+                    "vectorgrep: greptest1.txta: No such file or directory",
+                    "greptest2.txt",
+                ],
+                2,
+            ),
+        },
+        "files with match and error": {
+            "args": [
+                [
+                    GREP_FILE_1 + "a",
+                    GREP_FILE_1,
+                    GREP_FILE_2,
+                ],
+                ["greptest2"],
+            ],
+            "kwargs": {
+                "files_with_matches": True,
+            },
+            "returns": (
+                [
+                    "vectorgrep: greptest1.txta: No such file or directory",
+                    "greptest1.txt",
+                ],
+                2,
+            ),
+        },
     },
     "parse_args": {
         "leading pattern positional and file positionals": {
