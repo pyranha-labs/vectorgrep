@@ -750,6 +750,54 @@ TEST_CASES = {
                 2,
             ),
         },
+        "match, quiet": {
+            "args": [
+                [
+                    GREP_FILE_1,
+                    GREP_FILE_2,
+                ],
+                ["foobar"],
+            ],
+            "kwargs": {
+                "quiet": True,
+            },
+            "returns": (
+                [],
+                0,
+            ),
+        },
+        "no match, quiet": {
+            "args": [
+                [
+                    GREP_FILE_1,
+                    GREP_FILE_2,
+                ],
+                ["foobarasdf"],
+            ],
+            "kwargs": {
+                "quiet": True,
+            },
+            "returns": (
+                [],
+                1,
+            ),
+        },
+        "match and error, quiet": {
+            "args": [
+                [
+                    GREP_FILE_1,
+                    GREP_FILE_2 + "a",
+                ],
+                ["foobarasdf"],
+            ],
+            "kwargs": {
+                "quiet": True,
+            },
+            "returns": (
+                ["vectorgrep: greptest2.txta: No such file or directory"],
+                2,
+            ),
+        },
     },
     "parse_args": {
         "leading pattern positional and file positionals": {

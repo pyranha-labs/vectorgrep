@@ -83,7 +83,7 @@ def get_argparse_patterns(args: argparse.Namespace) -> list[str]:
     return all_patterns
 
 
-def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylint: disable=too-many-arguments,too-many-locals
+def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylint: disable=too-many-arguments,too-many-locals,too-many-statements
     files: list,
     patterns: list[str],
     ignore_case: bool = False,
@@ -96,6 +96,7 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
     only_matching: bool = False,
     no_messages: bool = False,
     max_match_count: int = 0,
+    quiet: bool = False,
 ) -> int:
     """Search files for a regex pattern and print the results based on user requested formatting.
 
@@ -113,10 +114,16 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
         no_messages: Suppress error messages about nonexistent or unreadable files.
         max_match_count: Stop reading the file after requested number of matches found.
             Use 0 to indicate no limit. Limit is per file to match grep behavior.
+        quiet: Whether to skip writing to standard output and exit immediately on match.
+            Exits all files on first result to match grep behavior.
 
     Returns:
         Exit code representing a standard grep exit code based on results and errors.
     """
+    if quiet:
+        # Override max match count, quiet always exits on first hit.
+        max_match_count = 1
+
     pending = {}
     total = 0
     next_index = 0
@@ -141,10 +148,12 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
             errored = True
             return
         grep_result, grep_return_code = grep_result
-        if grep_result:
-            matched = True
         if grep_return_code:
             errored = True
+        if grep_result:
+            matched = True
+            if quiet:
+                return
         if total_results:
             total += grep_result
         elif count_results:
@@ -160,10 +169,11 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
                     with_file_name=with_file_name,
                     with_line_number=with_line_number,
                 )
-            except BrokenPipeError as error:
+            except BrokenPipeError:
                 # NOTE: Piping output to additional commands such as head may close the output file.
-                # This is unavoidable, and the only thing that can be done is catch, and exit.
-                raise SystemExit(2) from error
+                # This is unavoidable, and the only thing that can be done is catch, and continue.
+                # Do not attempt to raise exceptions, otherwise the pool may never complete.
+                pass
         next_index += 1
         if next_index in pending:
             _on_grep_finish((next_index, pending.pop(next_index)))
@@ -183,6 +193,9 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
             jobs.append(pool.apply_async(_grep_with_index, (index, args, kwargs), callback=_on_grep_finish))
         for job in jobs:
             job.get()
+            if matched and quiet:
+                pool.terminate()
+                break
 
     if total_results:
         print(total)
@@ -420,6 +433,13 @@ def parse_args(args: list = None) -> argparse.Namespace:
         help="Print only the matched (non-empty) parts of a matching line, with each such part on a separate output line.",
     )
     output_args.add_argument(
+        "-q",
+        "--quiet",
+        "--silent",
+        action="store_true",
+        help="Quiet; do not write anything to standard output. Exit immediately with zero status if any match is found, even if an error was detected. Also see the -s or --no-messages option.",
+    )
+    output_args.add_argument(
         "-s",
         "--no-messages",
         action="store_true",
@@ -549,6 +569,7 @@ def main() -> None:
         only_matching=args.only_matching,
         no_messages=args.no_messages,
         max_match_count=args.max_count,
+        quiet=args.quiet,
     )
     raise SystemExit(return_code)
 
