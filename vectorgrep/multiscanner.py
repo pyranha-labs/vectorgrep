@@ -83,7 +83,7 @@ def get_argparse_patterns(args: argparse.Namespace) -> list[str]:
     return all_patterns
 
 
-def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylint: disable=too-many-arguments,too-many-locals,too-many-statements
+def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylint: disable=too-many-arguments,too-many-branches,too-many-locals,too-many-statements
     files: list,
     patterns: list[str],
     ignore_case: bool = False,
@@ -96,6 +96,8 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
     only_matching: bool = False,
     no_messages: bool = False,
     max_match_count: int = 0,
+    files_without_match: bool = False,
+    files_with_matches: bool = False,
     quiet: bool = False,
 ) -> int:
     """Search files for a regex pattern and print the results based on user requested formatting.
@@ -114,14 +116,16 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
         no_messages: Suppress error messages about nonexistent or unreadable files.
         max_match_count: Stop reading the file after requested number of matches found.
             Use 0 to indicate no limit. Limit is per file to match grep behavior.
-        quiet: Whether to skip writing to standard output and exit immediately on match.
+        files_without_match: Whether to suppress normal output and only print file names without matches.
+        files_with_matches: Whether to suppress normal output and only print file names with matches.
+        quiet: Whether to suppress normal output and exit immediately on match.
             Exits all files on first result to match grep behavior.
 
     Returns:
         Exit code representing a standard grep exit code based on results and errors.
     """
-    if quiet:
-        # Override max match count, quiet always exits on first hit.
+    if files_without_match or files_with_matches or quiet:
+        # Override max match count, all these options always exit on first hit.
         max_match_count = 1
 
     pending = {}
@@ -146,6 +150,7 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
             # Error message style taken from "grep" output format.
             print(f"vectorgrep: {file_name}: {grep_result}")
             errored = True
+            _update_job_index()
             return
         grep_result, grep_return_code = grep_result
         if grep_return_code:
@@ -154,7 +159,13 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
             matched = True
             if quiet:
                 return
-        if total_results:
+        if files_without_match:
+            if not grep_result:
+                print(file_name)
+        elif files_with_matches:
+            if grep_result:
+                print(file_name)
+        elif total_results:
             total += grep_result
         elif count_results:
             if with_file_name:
@@ -174,6 +185,11 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
                 # This is unavoidable, and the only thing that can be done is catch, and continue.
                 # Do not attempt to raise exceptions, otherwise the pool may never complete.
                 pass
+        _update_job_index()
+
+    def _update_job_index() -> None:
+        """Update the next job index, and replay the next result if it was pending."""
+        nonlocal next_index
         next_index += 1
         if next_index in pending:
             _on_grep_finish((next_index, pending.pop(next_index)))
@@ -420,6 +436,18 @@ def parse_args(args: list = None) -> argparse.Namespace:
         help="Suppress normal output; instead print a count of matching lines for each input file.",
     )
     output_args.add_argument(
+        "-L",
+        "--files-without-match",
+        action="store_true",
+        help="Suppress normal output; instead print the name of each input file from which no output would normally have been printed. The scanning will stop on the first match.",
+    )
+    output_args.add_argument(
+        "-l",
+        "--files-with-matches",
+        action="store_true",
+        help="Suppress normal output; instead print the name of each input file from which output would normally have been printed. The scanning will stop on the first match.",
+    )
+    output_args.add_argument(
         "-m",
         "--max-count",
         type=int,
@@ -570,6 +598,8 @@ def main() -> None:
         no_messages=args.no_messages,
         max_match_count=args.max_count,
         quiet=args.quiet,
+        files_without_match=args.files_without_match,
+        files_with_matches=args.files_with_matches,
     )
     raise SystemExit(return_code)
 
