@@ -248,6 +248,46 @@ TEST_CASES = {
                 0,
             ),
         },
+        "invalid file": {
+            "args": [
+                TEST_FILE_ZST + "a",
+                ["bar"],
+            ],
+            "raises": FileNotFoundError,
+        },
+        "invalid file, no messages": {
+            "args": [
+                TEST_FILE_ZST + "a",
+                ["bar"],
+            ],
+            "kwargs": {
+                "no_messages": True,
+            },
+            "returns": (
+                [],
+                101,
+            ),
+        },
+        "invalid file, is directory": {
+            "args": [
+                os.path.dirname(TEST_FILE_ZST),
+                ["bar"],
+            ],
+            "raises": ValueError,
+        },
+        "invalid file, is directory, no messages": {
+            "args": [
+                os.path.dirname(TEST_FILE_ZST),
+                ["bar"],
+            ],
+            "kwargs": {
+                "no_messages": True,
+            },
+            "returns": (
+                [],
+                101,
+            ),
+        },
     },
     "parallel_grep": {
         "single file, with file name": {
@@ -258,9 +298,12 @@ TEST_CASES = {
             "kwargs": {
                 "with_file_name": True,
             },
-            "returns": [
-                "greptest1.txt:foobar",
-            ],
+            "returns": (
+                [
+                    "greptest1.txt:foobar",
+                ],
+                0,
+            ),
         },
         "single file, with file name and line index": {
             "args": [
@@ -271,9 +314,12 @@ TEST_CASES = {
                 "with_file_name": True,
                 "with_line_number": True,
             },
-            "returns": [
-                "greptest1.txt:3:foobar",
-            ],
+            "returns": (
+                [
+                    "greptest1.txt:3:foobar",
+                ],
+                0,
+            ),
         },
         "single file, with file name and count": {
             "args": [
@@ -284,9 +330,12 @@ TEST_CASES = {
                 "count_results": True,
                 "with_file_name": True,
             },
-            "returns": [
-                "greptest1.txt:16",
-            ],
+            "returns": (
+                [
+                    "greptest1.txt:16",
+                ],
+                0,
+            ),
         },
         "single file, with file name and total": {
             "args": [
@@ -297,10 +346,13 @@ TEST_CASES = {
                 "total_results": True,
                 "with_file_name": True,
             },
-            "returns": [
-                # It is expected for total to not show a file name, it is a total. This ensures expected behavior.
-                "16",
-            ],
+            "returns": (
+                [
+                    # It is expected for total to not show a file name, it is a total. This ensures expected behavior.
+                    "16",
+                ],
+                0,
+            ),
         },
         "single file, no file name, with line index": {
             "args": [
@@ -310,9 +362,12 @@ TEST_CASES = {
             "kwargs": {
                 "with_line_number": True,
             },
-            "returns": [
-                "3:foobar",
-            ],
+            "returns": (
+                [
+                    "3:foobar",
+                ],
+                0,
+            ),
         },
         "single file, no file name, with count": {
             "args": [
@@ -322,9 +377,12 @@ TEST_CASES = {
             "kwargs": {
                 "count_results": True,
             },
-            "returns": [
-                "16",
-            ],
+            "returns": (
+                [
+                    "16",
+                ],
+                0,
+            ),
         },
         "single file, no file name, with total": {
             "args": [
@@ -334,9 +392,12 @@ TEST_CASES = {
             "kwargs": {
                 "total_results": True,
             },
-            "returns": [
-                "16",
-            ],
+            "returns": (
+                [
+                    "16",
+                ],
+                0,
+            ),
         },
         "single file, stop on non-zero match count": {
             "args": [
@@ -346,11 +407,14 @@ TEST_CASES = {
             "kwargs": {
                 "max_match_count": 3,
             },
-            "returns": [
-                "foo",
-                "foobar",
-                "[foo]",
-            ],
+            "returns": (
+                [
+                    "foo",
+                    "foobar",
+                    "[foo]",
+                ],
+                0,
+            ),
         },
         "multi file, with file name": {
             "args": [
@@ -360,10 +424,13 @@ TEST_CASES = {
             "kwargs": {
                 "with_file_name": True,
             },
-            "returns": [
-                "greptest1.txt:foobar",
-                "greptest2.txt:foobar",
-            ],
+            "returns": (
+                [
+                    "greptest1.txt:foobar",
+                    "greptest2.txt:foobar",
+                ],
+                0,
+            ),
         },
         "multi file, with file name and line index": {
             "args": [
@@ -374,10 +441,13 @@ TEST_CASES = {
                 "with_file_name": True,
                 "with_line_number": True,
             },
-            "returns": [
-                "greptest1.txt:3:foobar",
-                "greptest2.txt:3:foobar",
-            ],
+            "returns": (
+                [
+                    "greptest1.txt:3:foobar",
+                    "greptest2.txt:3:foobar",
+                ],
+                0,
+            ),
         },
         "multi file, with file name and count": {
             "args": [
@@ -388,10 +458,13 @@ TEST_CASES = {
                 "count_results": True,
                 "with_file_name": True,
             },
-            "returns": [
-                "greptest1.txt:16",
-                "greptest2.txt:16",
-            ],
+            "returns": (
+                [
+                    "greptest1.txt:16",
+                    "greptest2.txt:16",
+                ],
+                0,
+            ),
         },
         "multi file, with file name and total": {
             "args": [
@@ -402,10 +475,13 @@ TEST_CASES = {
                 "total_results": True,
                 "with_file_name": True,
             },
-            "returns": [
-                # It is expected for total to not show a file name, it is a total. This ensures expected behavior.
-                "32"
-            ],
+            "returns": (
+                [
+                    # It is expected for total to not show a file name, it is a total. This ensures expected behavior.
+                    "32",
+                ],
+                0,
+            ),
         },
         "multi file, no file name, with line index": {
             "args": [
@@ -415,10 +491,13 @@ TEST_CASES = {
             "kwargs": {
                 "with_line_number": True,
             },
-            "returns": [
-                "3:foobar",
-                "3:foobar",
-            ],
+            "returns": (
+                [
+                    "3:foobar",
+                    "3:foobar",
+                ],
+                0,
+            ),
         },
         "multi file, no file name, with count": {
             "args": [
@@ -428,10 +507,13 @@ TEST_CASES = {
             "kwargs": {
                 "count_results": True,
             },
-            "returns": [
-                "16",
-                "16",
-            ],
+            "returns": (
+                [
+                    "16",
+                    "16",
+                ],
+                0,
+            ),
         },
         "multi file, no file name, with total": {
             "args": [
@@ -441,9 +523,12 @@ TEST_CASES = {
             "kwargs": {
                 "total_results": True,
             },
-            "returns": [
-                "32",
-            ],
+            "returns": (
+                [
+                    "32",
+                ],
+                0,
+            ),
         },
         "multi file, stop on non-zero match count": {
             "args": [
@@ -455,21 +540,27 @@ TEST_CASES = {
                 "with_line_number": True,
                 "max_match_count": 2,
             },
-            "returns": [
-                "greptest1.txt:2:foo",
-                "greptest1.txt:3:foobar",
-                "greptest2.txt:2:foo",
-                "greptest2.txt:3:foobar",
-            ],
+            "returns": (
+                [
+                    "greptest1.txt:2:foo",
+                    "greptest1.txt:3:foobar",
+                    "greptest2.txt:2:foo",
+                    "greptest2.txt:3:foobar",
+                ],
+                0,
+            ),
         },
         "case sensitive": {
             "args": [
                 [GREP_FILE_1],
                 ["fOoBaR"],
             ],
-            "returns": [
-                # No match expected.
-            ],
+            "returns": (
+                [
+                    # No match expected.
+                ],
+                1,
+            ),
         },
         "case insensitive": {
             "args": [
@@ -477,26 +568,37 @@ TEST_CASES = {
                 ["fOoBaR"],
             ],
             "kwargs": {"ignore_case": True},
-            "returns": ["foobar"],
+            "returns": (
+                [
+                    "foobar",
+                ],
+                0,
+            ),
         },
         "special character exact": {
             "args": [
                 [GREP_FILE_1],
                 ["barfoo\\+"],
             ],
-            "returns": [
-                "barfoo+",
-            ],
+            "returns": (
+                [
+                    "barfoo+",
+                ],
+                0,
+            ),
         },
         "special character regex": {
             "args": [
                 [GREP_FILE_1],
                 ["barfoo+"],
             ],
-            "returns": [
-                "barfoo",
-                "barfoo+",
-            ],
+            "returns": (
+                [
+                    "barfoo",
+                    "barfoo+",
+                ],
+                0,
+            ),
         },
         "only matching with single level groups": {
             "args": [
@@ -504,12 +606,15 @@ TEST_CASES = {
                 ["grep file to test|sync with"],
             ],
             "kwargs": {"only_matching": True},
-            "returns": [
-                "grep file to test",
-                "sync with",
-                "grep file to test",
-                "sync with",
-            ],
+            "returns": (
+                [
+                    "grep file to test",
+                    "sync with",
+                    "grep file to test",
+                    "sync with",
+                ],
+                0,
+            ),
         },
         "only matching with redundant inner nested level group": {
             "args": [
@@ -517,22 +622,28 @@ TEST_CASES = {
                 ["grep file (to|to test)|sync with"],
             ],
             "kwargs": {"only_matching": True},
-            "returns": [
-                "grep file to",
-                "sync with",
-                "grep file to",
-                "sync with",
-            ],
+            "returns": (
+                [
+                    "grep file to",
+                    "sync with",
+                    "grep file to",
+                    "sync with",
+                ],
+                0,
+            ),
         },
         "only matching pattern without only matching enabled": {
             "args": [
                 [GREP_FILE_1],
                 ["grep file to test|sync with"],
             ],
-            "returns": [
-                "# Primary grep file to test patterns. Keep in sync with greptest2.txt.",
-                "# Primary grep file to test patterns. Keep in sync with greptest2.txt.",
-            ],
+            "returns": (
+                [
+                    "# Primary grep file to test patterns. Keep in sync with greptest2.txt.",
+                    "# Primary grep file to test patterns. Keep in sync with greptest2.txt.",
+                ],
+                0,
+            ),
         },
         "multiple unique patterns": {
             "args": [
@@ -546,7 +657,13 @@ TEST_CASES = {
                 "with_file_name": True,
                 "with_line_number": True,
             },
-            "returns": ["greptest1.txt:3:foobar", "greptest1.txt:16:extra foo bar"],
+            "returns": (
+                [
+                    "greptest1.txt:3:foobar",
+                    "greptest1.txt:16:extra foo bar",
+                ],
+                0,
+            ),
         },
         "Multiple redundant patterns": {
             "args": [
@@ -561,9 +678,77 @@ TEST_CASES = {
                 "with_file_name": True,
                 "with_line_number": True,
             },
-            "returns": [
-                "greptest1.txt:3:foobar",
+            "returns": (
+                [
+                    "greptest1.txt:3:foobar",
+                ],
+                0,
+            ),
+        },
+        "match and error": {
+            "args": [
+                [
+                    GREP_FILE_1,
+                    GREP_FILE_1 + "a",
+                ],
+                ["foobar"],
             ],
+            "returns": (
+                [
+                    "foobar",
+                    "vectorgrep: greptest1.txta: No such file or directory",
+                ],
+                2,
+            ),
+        },
+        "match and error, no messages": {
+            "args": [
+                [
+                    GREP_FILE_1,
+                    GREP_FILE_1 + "a",
+                ],
+                ["foobar"],
+            ],
+            "kwargs": {
+                "no_messages": True,
+            },
+            "returns": (
+                [
+                    "foobar",
+                ],
+                2,
+            ),
+        },
+        "no match and error": {
+            "args": [
+                [
+                    GREP_FILE_1,
+                    GREP_FILE_1 + "a",
+                ],
+                ["foobarasdf"],
+            ],
+            "returns": (
+                [
+                    "vectorgrep: greptest1.txta: No such file or directory",
+                ],
+                2,
+            ),
+        },
+        "no match and error, no messages": {
+            "args": [
+                [
+                    GREP_FILE_1,
+                    GREP_FILE_1 + "a",
+                ],
+                ["foobarasdf"],
+            ],
+            "kwargs": {
+                "no_messages": True,
+            },
+            "returns": (
+                [],
+                2,
+            ),
         },
     },
     "parse_args": {
@@ -721,14 +906,14 @@ def test_grep(test_case: dict, function_tester: Callable) -> None:
 def test_parallel_grep(test_case: dict, capsys: Any, function_tester: Callable) -> None:
     """Tests for parallel_grep function."""
 
-    def parallel_grep_helper(*args: Any, **kwargs: Any) -> list:
+    def parallel_grep_helper(*args: Any, **kwargs: Any) -> tuple[list[str], int]:
         """Helper to run parallel_grep and capture output for comparisons."""
-        multiscanner.parallel_grep(*args, **kwargs)
+        return_code = multiscanner.parallel_grep(*args, **kwargs)
         capture = capsys.readouterr()
         stdout = capture.out.splitlines()
         # Strip off the leading file name in output to keep the tests portable across systems.
         cleaned = [line.replace(f"{TEST_ROOT}/", "") for line in stdout]
-        return cleaned
+        return cleaned, return_code
 
     function_tester(test_case, parallel_grep_helper)
 
@@ -759,11 +944,11 @@ def test_to_gnu_regular_expressions(test_case: dict, function_tester: Callable) 
 def test_vectorscan(test_case: dict, capsys: Any, function_tester: Callable) -> None:
     """Tests for vectorscan function."""
 
-    def _grep_helper(*args: Any, **kwargs: Any) -> list:
+    def _scan_helper(*args: Any, **kwargs: Any) -> list:
         """Helper to run vectorscan and capture output for comparisons."""
         utils.scan(*args, **kwargs)
         capture = capsys.readouterr()
         stdout = capture.out.splitlines()
         return stdout
 
-    function_tester(test_case, _grep_helper)
+    function_tester(test_case, _scan_helper)

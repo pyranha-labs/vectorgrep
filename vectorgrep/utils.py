@@ -12,6 +12,9 @@ HS_FLAG_DOTALL = 2
 HS_FLAG_MULTILINE = 4
 HS_FLAG_SINGLEMATCH = 8
 
+# Use 101-125 as utility return codes to avoid conflicts with vectorscan and linux return codes.
+RC_INVALID_FILE = 101
+
 __libvectorgrep__ = None
 __libvectorgrep_path__ = ""
 __libvectorscan__ = None
@@ -180,27 +183,28 @@ def grep(  # pylint: disable=too-many-arguments
 
     Returns:
         Line count, or list of tuples with the line index and matching line, and return code.
+            Return codes 1-7 are from vectorscan, and 101-125 from python.
 
-    Raise:
-        FileNotFoundError if the file does not exist.
-        ValueError if the file is a directory.
+    Raises:
+        FileNotFoundError if the file does not exist and no_messages is false.
+        ValueError if the file is a directory and no_messages is false.
     """
+    return_code = 0
     compiled_patterns = [re.compile(pattern) for pattern in patterns]
     results = [] if not count_only else 0
 
     # Exception messages taken directly from "grep" error messages.
     # Silent behavior also taken from "grep" to not raise or print a message if path is invalid.
-    valid = True
     if not os.path.exists(file):
-        valid = False
+        return_code = RC_INVALID_FILE
         if not no_messages:
             raise FileNotFoundError("No such file or directory")
     if os.path.isdir(file):
-        valid = False
+        return_code = RC_INVALID_FILE
         if not no_messages:
             raise ValueError("is a directory")
 
-    if valid:
+    if not return_code:
 
         def _c_callback(matches: list, count: int) -> None:
             """Called by the C library everytime it finds a batch of matching lines."""
@@ -233,8 +237,7 @@ def grep(  # pylint: disable=too-many-arguments
             flags=[flags for _ in patterns],
             max_match_count=max_match_count,
         )
-    else:
-        return_code = 1
+
     return results, return_code
 
 
