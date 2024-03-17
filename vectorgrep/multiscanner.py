@@ -96,7 +96,7 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
     only_matching: bool = False,
     no_messages: bool = False,
     max_match_count: int = 0,
-) -> None:
+) -> int:
     """Search files for a regex pattern and print the results based on user requested formatting.
 
     Args:
@@ -113,15 +113,22 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
         no_messages: Suppress error messages about nonexistent or unreadable files.
         max_match_count: Stop reading the file after requested number of matches found.
             Use 0 to indicate no limit. Limit is per file to match grep behavior.
+
+    Returns:
+        Exit code representing a standard grep exit code based on results and errors.
     """
     pending = {}
     total = 0
     next_index = 0
+    matched = False
+    errored = False
 
     def _on_grep_finish(result: tuple[int, list[str | tuple[int, str]]]) -> None:
         """Callback to parallel processing pool to track and print completed requests."""
         nonlocal total
         nonlocal next_index
+        nonlocal errored
+        nonlocal matched
 
         grep_index, grep_result = result
         if ordered_results and grep_index != next_index:
@@ -131,8 +138,13 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
         if isinstance(grep_result, Exception):
             # Error message style taken from "grep" output format.
             print(f"vectorgrep: {file_name}: {grep_result}")
+            errored = True
             return
-        grep_result, _ = grep_result
+        grep_result, grep_return_code = grep_result
+        if grep_result:
+            matched = True
+        if grep_return_code:
+            errored = True
         if total_results:
             total += grep_result
         elif count_results:
@@ -151,7 +163,7 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
             except BrokenPipeError as error:
                 # NOTE: Piping output to additional commands such as head may close the output file.
                 # This is unavoidable, and the only thing that can be done is catch, and exit.
-                raise SystemExit(1) from error
+                raise SystemExit(2) from error
         next_index += 1
         if next_index in pending:
             _on_grep_finish((next_index, pending.pop(next_index)))
@@ -174,6 +186,12 @@ def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylin
 
     if total_results:
         print(total)
+
+    # Match the corresponding exit code for grep based the following:
+    # 2 - Any errors, regardless of match status.
+    # 1 - No matches and no errors.
+    # 0 - Matches and no errors.
+    return 2 if errored else 1 if not matched else 0
 
 
 def print_results(
@@ -518,7 +536,7 @@ def main() -> None:
     elif len(files) == 1:
         with_filename = False
 
-    parallel_grep(
+    return_code = parallel_grep(
         files=files,
         patterns=patterns,
         ignore_case=args.ignore_case,
@@ -532,6 +550,7 @@ def main() -> None:
         no_messages=args.no_messages,
         max_match_count=args.max_count,
     )
+    raise SystemExit(return_code)
 
 
 if __name__ == "__main__":
