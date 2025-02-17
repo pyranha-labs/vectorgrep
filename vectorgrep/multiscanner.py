@@ -83,7 +83,7 @@ def get_argparse_patterns(args: argparse.Namespace) -> list[str]:
     return all_patterns
 
 
-def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylint: disable=too-many-arguments,too-many-branches,too-many-locals,too-many-statements
+def parallel_grep(  # This cannot be shortened due to parallel pool usage. pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-branches,too-many-locals,too-many-statements
     files: list,
     patterns: list[str],
     ignore_case: bool = False,
