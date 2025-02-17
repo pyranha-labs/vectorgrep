@@ -1027,9 +1027,9 @@ def test_greptest_file_sync() -> None:
         file2_contents = [line for line in file2_contents if not line.startswith("#")]
     assert file2_contents, f"Failed to read test file: {GREP_FILE_2}"
 
-    assert (
-        file1_contents == file2_contents
-    ), f"{GREP_FILE_1} contents differ from {GREP_FILE_2}. Please ensure all content lines match."
+    assert file1_contents == file2_contents, (
+        f"{GREP_FILE_1} contents differ from {GREP_FILE_2}. Please ensure all content lines match."
+    )
 
 
 @pytest.mark.parametrize_test_case("test_case", TEST_CASES["get_argparse_files"])

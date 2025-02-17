@@ -154,7 +154,7 @@ def configure_libraries(
         __libzstd_path__ = libzstd
 
 
-def grep(  # pylint: disable=too-many-arguments
+def grep(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     file: str,
     patterns: list[str],
     ignore_case: bool = False,
@@ -299,7 +299,7 @@ def prepare_patterns(
     return pattern_array, flags_array, ids_array
 
 
-def scan(  # pylint: disable=too-many-arguments
+def scan(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     path: str,
     patterns: list[str],
     callback: Callable,
