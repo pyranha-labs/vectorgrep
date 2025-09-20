@@ -372,7 +372,7 @@ def scan(  # pylint: disable=too-many-arguments,too-many-positional-arguments
 if not __libvectorgrep_path__:
     module = os.path.abspath(os.path.dirname(__file__))
     configure_libraries(
-        libhs=os.path.join(module, "lib", "libhs.so.5.4.11"),
+        libhs=os.path.join(module, "lib", "libhs.so.5.4.12"),
         libvectorgrep=os.path.join(module, "lib", "libvectorgrep.so"),
-        libzstd=os.path.join(module, "lib", "libzstd.so.1.5.5"),
+        libzstd=os.path.join(module, "lib", "libzstd.so.1.5.7"),
     )

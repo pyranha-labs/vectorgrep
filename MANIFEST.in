@@ -2,8 +2,8 @@ include README.md
 include LICENSE
 include COPYING
 include requirements*.txt
-include vectorgrep/lib/libhs.so.5.4.11
+include vectorgrep/lib/libhs.so.5.4.12
 include vectorgrep/lib/libvectorgrep.so
-include vectorgrep/lib/libzstd.so.1.5.5
+include vectorgrep/lib/libzstd.so.1.5.7
 include vectorgrep/lib/c/vectorgrep.c
 include vectorgrep/lib/c/vectorgrep.h
