@@ -59,7 +59,7 @@ targets = [
 ]
 
 [tool.coverage.report]
-fail_under = 80
+fail_under = 85
 
 [tool.coverage.run]
 branch = true
