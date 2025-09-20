@@ -28,6 +28,7 @@ GREP_FILE_1 = os.path.join(TEST_ROOT, "greptest1.txt")
 GREP_FILE_2 = os.path.join(TEST_ROOT, "greptest2.txt")
 FAKE_FILES = {
     "regex.txt": "filepattern1\nfilepattern2",
+    "input.txt": "input1\ninput2\ninput3\n",
 }
 TEST_FILE = os.path.join(TEST_ROOT, "samplefile.txt")
 TEST_FILE_GZ = os.path.join(TEST_ROOT, f"{TEST_FILE}.gz")
@@ -114,6 +115,12 @@ TEST_CASES = {
             ],
             "returns": ["pattern1", "file1", "file2", "file3", "f4"],
         },
+        "files from file": {
+            "args": [
+                multiscanner.parse_args(shlex.split("pattern1 --input-file input.txt")),
+            ],
+            "returns": ["input1", "input2", "input3"],
+        },
     },
     "get_argparse_patterns": {
         "leading pattern positional and file positionals": {
@@ -156,6 +163,13 @@ TEST_CASES = {
                 multiscanner.parse_args(shlex.split("pattern1 file1 -e pattern2 file2 -e pattern3 file3 f4")),
             ],
             "returns": ["pattern2", "pattern3"],
+        },
+        "patterns from file": {
+            "args": [
+                multiscanner.parse_args(shlex.split("file1 -f input.txt")),
+            ],
+            # Per grep, the positional is treated as a file, instead of a pattern, because a pattern kwarg is used.
+            "returns": ["input1", "input2", "input3"],
         },
     },
     "scan": {

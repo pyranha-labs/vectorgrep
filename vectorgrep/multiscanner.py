@@ -40,6 +40,10 @@ def get_argparse_files(args: argparse.Namespace) -> list[str]:
         all_files.append(args.pattern)
     if args.files:
         all_files.extend(args.files)
+    if args.input_files:
+        for file_name in args.input_files:
+            with open(file_name, "rt", encoding="utf-8") as input_file:
+                all_files.extend(file_path.rstrip("\n") for file_path in input_file.readlines())
     return all_files
 
 
@@ -418,7 +422,7 @@ def parse_args(args: list = None) -> argparse.Namespace:
         "--file",
         action="append",
         dest="pattern_files",
-        metavar="file",
+        metavar="FILE",
         help="Obtain patterns from FILE, one per line. If this option is used multiple times or is combined with the -e (--regexp) option, search for all patterns given. The empty file contains zero patterns, and therefore matches nothing.",
     )
     matching_args.add_argument(
@@ -514,6 +518,13 @@ def parse_args(args: list = None) -> argparse.Namespace:
         "--total",
         action="store_true",
         help="Suppress normal output; instead print a count of matching lines across all input files.",
+    )
+    vector_args.add_argument(
+        "--input-file",
+        action="append",
+        dest="input_files",
+        metavar="INPUT_FILE",
+        help="Obtain files to scan from INPUT_FILE, one per line.",
     )
     vector_args.add_argument(
         "--no-gnu",
