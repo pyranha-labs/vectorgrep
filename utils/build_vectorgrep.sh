@@ -6,25 +6,34 @@
 
 # Set the versions to build so they are consistent throughout the script when updates are performed.
 BOOST_BUILD_VERSION=1.75.0
-VECTORSCAN_BUILD_VERSION=5.4.11
-ZSTD_BUILD_VERSION=1.5.5
+VECTORSCAN_BUILD_VERSION=5.4.12
+ZSTD_BUILD_VERSION=1.5.7
 
-# Allow customizing the platform/build options for creating isolated local builds, or testing non-prod versions.
+# Allow customizing the Docker platform options for creating isolated local builds, or testing non-prod versions.
+IMAGE=ubuntu:xenial
+PLATFORM=linux/amd64
+
+# Allow customizing the C platform/build options for creating isolated local builds, or testing non-prod versions.
 # Options are based on cmake versions, e.g., linux-x86_64, linux-aarch64, etc.
-PLATFORM=linux-x86_64
+C_PLATFORM=linux-x86_64
 # Trusty contains cmake that is too old for Vectorscan 5.4.11+ (3.20+ required).
 CMAKE=3.28.1
-
-# Force execution in docker to ensure reproducibility.
-if [ ! -f /.dockerenv ]; then
-  echo "Please run inside docker to isolate dependencies, prevent modifications to system, and ensure reproducibility. Aborting."
-  echo "Example: docker run --rm -it -v ~/Development/vectorgrep:/mnt/vectorgrep ubuntu:trusty bash -c '/mnt/vectorgrep/utils/build_vectorgrep.sh'"
-  exit 1
-fi
+# Trusty must to set to off. Default image is Xenial, so fat is on.
+FAT="On"
 
 # Pull out user args to modify default behavior.
 while [[ $# -gt 0 ]]; do
   case $1 in
+    --image)
+      if [ -z "$2" ]; then echo "Must provide image version. Example: --image ${IMAGE}"; exit 1; fi
+      IMAGE=$2
+      shift
+    ;;
+    --platform)
+      if [ -z "$2" ]; then echo "Must provide image platform. Example: --platform ${PLATFORM}"; exit 1; fi
+      PLATFORM=$2
+      shift
+    ;;
     --boost)
       if [ -z "$2" ]; then echo "Must provide boost version. Example: --boost ${BOOST_BUILD_VERSION}"; exit 1; fi
       BOOST_BUILD_VERSION=$2
@@ -35,9 +44,14 @@ while [[ $# -gt 0 ]]; do
       CMAKE=$2
       shift
     ;;
-    --platform)
-      if [ -z "$2" ]; then echo "Must provide platform version. Example: --platform ${PLATFORM}"; exit 1; fi
-      PLATFORM=$2
+    --cplatform)
+      if [ -z "$2" ]; then echo "Must provide cmake platform. Example: --cplatform ${C_PLATFORM}"; exit 1; fi
+      C_PLATFORM=$2
+      shift
+    ;;
+    --fat)
+      if [ -z "$2" ]; then echo "Must provide fat runtime as On/Off. Must be off for trusty. Example: --fat ${FAT}"; exit 1; fi
+      FAT=$2
       shift
     ;;
     --vectorscan)
@@ -53,6 +67,17 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+# Force execution in docker to ensure reproducibility.
+if [ ! -f /.dockerenv ]; then
+  echo "Running in docker."
+  docker run --rm -it \
+    -v $(pwd):/mnt/vectorgrep \
+    --platform ${PLATFORM} \
+    ${IMAGE} \
+    bash -c "/mnt/vectorgrep/utils/build_vectorgrep.sh --boost ${BOOST_BUILD_VERSION} --cmake ${CMAKE} --cplatform ${C_PLATFORM} --vectorscan ${VECTORSCAN_BUILD_VERSION} --zstd ${ZSTD_BUILD_VERSION}"
+  exit 0
+fi
 
 # Ensure the whole script exits on failures.
 set -e
@@ -86,10 +111,10 @@ update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 50 --slave /usr/bi
 update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-9 50
 
 # Trusty contains cmake that is too old for Vectorscan 5.4.11+ (3.20+ required).
-wget https://github.com/Kitware/CMake/releases/download/v${CMAKE}/cmake-${CMAKE}-${PLATFORM}.tar.gz
-tar -xf cmake-${CMAKE}-${PLATFORM}.tar.gz
-mv cmake-${CMAKE}-${PLATFORM}/bin/* /usr/bin/
-mv cmake-${CMAKE}-${PLATFORM}/share/cmake-$(echo $CMAKE |grep -o "[0-9].[0-9]\+") /usr/share/
+wget https://github.com/Kitware/CMake/releases/download/v${CMAKE}/cmake-${CMAKE}-${C_PLATFORM}.tar.gz
+tar -xf cmake-${CMAKE}-${C_PLATFORM}.tar.gz
+mv cmake-${CMAKE}-${C_PLATFORM}/bin/* /usr/bin/
+mv cmake-${CMAKE}-${C_PLATFORM}/share/cmake-$(echo $CMAKE |grep -o "[0-9].[0-9]\+") /usr/share/
 
 # Create a new temporary location to allow for isolated compiling.
 build_dir=$(mktemp -d -t hsbuild-XXXXXXXX)
@@ -113,7 +138,8 @@ mkdir build
 cd build
 cmake ../ -DCMAKE_BUILD_TYPE=Release \
   -DBOOST_ROOT="${build_dir}"/boost/ \
-  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+  -DFAT_RUNTIME=${FAT} \
+  -DCMAKE_POSITION_INDEPENDENT_CODE=On \
   -DBUILD_SHARED_LIBS=On
 make -j $(nproc)
 
