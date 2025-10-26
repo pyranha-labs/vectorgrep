@@ -3,7 +3,6 @@
 
 # Recipes unique to this project.
 UPSTREAM := git@github.com:pyranha-labs/vectorgrep.git
-PYLINT_EXTRAS :=
 
 ##### Initial Development Setups and Configurations #####
 
